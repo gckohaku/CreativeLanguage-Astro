@@ -4,16 +4,16 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev --remote",
-    "start": "astro dev  --remote",
-    "build": "astro check && astro build  --remote",
-    "preview": "astro preview  --remote",
+    "start": "astro dev --remote",
+    "build": "astro check && astro build --remote",
+    "preview": "astro preview --remote",
     "astro": "astro"
   },
   "dependencies": {
     "@astrojs/check": "^0.5.10",
-    "@astrojs/db": "^0.10.1",
-    "astro": "^4.5.16",
-    "sass": "^1.74.1",
-    "typescript": "^5.4.4"
+    "@astrojs/db": "^0.10.5",
+    "astro": "^4.6.3",
+    "sass": "^1.75.0",
+    "typescript": "^5.4.5"
   }
 }

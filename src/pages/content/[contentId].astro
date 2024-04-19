@@ -1,0 +1,156 @@
+---
+import type { GetStaticPaths } from "astro";
+import {
+	contents,
+	contents_images,
+	contents_tags,
+	db,
+	eq,
+	images,
+	tags,
+} from "astro:db";
+import TagsArea from "../../components/TagsArea.astro";
+import Layout from "../../layouts/Layout.astro";
+import { toDateString } from "../../utilities/relationDate";
+
+export const getStaticPaths = (async() => {
+	const contentDataRequest = db
+	.select()
+	.from(contents);
+const tagsRequest = db
+	.select({ content_id: contents_tags.content_id, tag_id: contents_tags.tag_id, tag_name: tags.tag_name })
+	.from(contents_tags)
+	.innerJoin(tags, eq(tags.tag_id, contents_tags.tag_id));
+const imagesRequest = db
+	.select({ content_id: contents_images.content_id, index: contents_images.image_index, path: images.file_path })
+	.from(contents_images)
+	.innerJoin(images, eq(contents_images.image_id, images.image_id));
+
+const [contentData, tagsData, imagesData] = await db.batch([
+	contentDataRequest,
+	tagsRequest,
+	imagesRequest,
+]);
+
+	return contentData.map((data) => ({
+		params: {contentId: data.content_id},
+		props: {
+			contentData: contentData.filter((x) => x.content_id === data.content_id),
+			tagsData: tagsData.filter((x) => x.content_id === data.content_id),
+			imagesData: imagesData.filter((x) => x.content_id === data.content_id),
+		}
+	}));
+}) satisfies GetStaticPaths;
+
+const contentId = Astro.params.contentId!;
+
+// const contentDataRequest = db
+// 	.select()
+// 	.from(contents)
+// 	.where(eq(contents.content_id, contentId));
+// const tagsRequest = db
+// 	.select({ tag_id: contents_tags.tag_id, tag_name: tags.tag_name })
+// 	.from(contents_tags)
+// 	.innerJoin(tags, eq(tags.tag_id, contents_tags.tag_id))
+// 	.where(eq(contents_tags.content_id, contentId));
+// const imagesRequest = db
+// 	.select({ index: contents_images.image_index, path: images.file_path })
+// 	.from(contents_images)
+// 	.innerJoin(images, eq(contents_images.image_id, images.image_id))
+// 	.where(eq(contents_images.content_id, contentId));
+
+// const [contentData, tagsData, imagesData] = await db.batch([
+// 	contentDataRequest,
+// 	tagsRequest,
+// 	imagesRequest,
+// ]);
+
+const {contentData, tagsData, imagesData} = Astro.props;
+
+const imgRegex = /\[img_set\|(?<index>\d+)(\|(?<caption>.+)|)\]+/;
+
+const paragraphs: string[] = contentData[0]?.content
+	.replace("\n", "")
+	.split("$&$");
+
+const getImageIndex = (re: RegExpMatchArray | null): number => {
+	if (re && re.groups && re.groups.index) {
+		return parseInt(re.groups.index) - 1;
+	}
+
+	throw "error when get image index";
+};
+
+const generateCaption = (re: RegExpMatchArray | null): string => {
+	if (re && re.groups && re.groups.caption) {
+		return re.groups.caption.replace("$n$", "<br>");
+	}
+	throw "error when generate caption";
+};
+---
+
+<Layout title="content test">
+	<div class="content-wrapper">
+		<h2>{contentData[0].title}</h2>
+		<p>
+			{toDateString(contentData[0].work_completed_date)}
+		</p>
+
+		{
+			paragraphs.map((para) => (
+				<div>
+					{imgRegex.test(para) ? (
+						<figure class="content-image-container">
+							<img
+								class="content-image"
+								src={
+									"/images/content/" +
+									imagesData.find(
+										(e) =>
+											e.index - 1 ===
+											getImageIndex(para.match(imgRegex)),
+									)!.path
+								}
+							/>
+							{para.match(imgRegex)?.groups?.caption && (
+								<figcaption
+									set:html={generateCaption(
+										para.match(imgRegex),
+									)}
+								/>
+							)}
+						</figure>
+					) : (
+						<p set:html={para.replaceAll("$n$", "<br>")} />
+					)}
+				</div>
+			))
+		}
+	</div>
+
+	<TagsArea tags={tagsData} />
+</Layout>
+
+<style scoped lang="scss">
+	.content-wrapper {
+		width: 100%;
+
+		.content-image-container {
+			text-align: center;
+
+			.content-image {
+				max-width: 95%;
+			}
+		}
+
+		.tags {
+			span {
+				padding-inline-end: 1rem;
+
+				&::before {
+					content: "#";
+				}
+			}
+		}
+	}
+</style>

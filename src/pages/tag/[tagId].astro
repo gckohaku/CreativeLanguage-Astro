@@ -1,0 +1,118 @@
+---
+import type { GetStaticPaths } from "astro";
+import {
+	db,
+	contents,
+	eq,
+	contents_tags,
+	tags,
+	contents_images,
+	images,
+	desc,
+} from "astro:db";
+import Layout from "../../layouts/Layout.astro";
+import ContentInfoCard from "../../components/ContentInfoCard.astro";
+
+export const getStaticPaths = (async () => {
+	const contentIdRequest = db
+		.selectDistinct({ content_id: contents_tags.content_id, tag_id: contents_tags.tag_id })
+		.from(contents_tags)
+		.innerJoin(contents, eq(contents.content_id, contents_tags.content_id))
+		.orderBy(desc(contents.work_completed_date));
+	const contentListRequest = db
+		.select({
+			content_id: contents.content_id,
+			title: contents.title,
+			date: contents.work_completed_date,
+			tag_id: contents_tags.tag_id,
+			content: contents.content,
+		})
+		.from(contents)
+		.innerJoin(
+			contents_tags,
+			eq(contents.content_id, contents_tags.content_id),
+		)
+		.orderBy(desc(contents.work_completed_date));
+	const tagsRequest = db.select().from(tags);
+
+	const [contentIds, contentList, tagsList] = await db.batch([
+		contentIdRequest,
+		contentListRequest,
+		tagsRequest,
+	]);
+
+	return tagsList.map((tag) => ({
+		params: {tagId: tag.tag_id},
+		props: {
+			contentIds: contentIds.filter((x) => x.tag_id === tag.tag_id),
+			contentList: contentList.filter((x) => x.tag_id === tag.tag_id),
+			tagsList: tagsList,
+		}
+	}));
+}) satisfies GetStaticPaths;
+
+const tagId = Astro.params.tagId!;
+
+// const contentIdRequest = db
+// 	.selectDistinct({ id: contents_tags.content_id })
+// 	.from(contents_tags)
+// 	.innerJoin(contents, eq(contents.content_id, contents_tags.content_id))
+// 	.where(eq(contents_tags.tag_id, tagId))
+// 	.orderBy(desc(contents.work_completed_date));
+// const contentListRequest = db
+// 	.select({
+// 		content_id: contents.content_id,
+// 		title: contents.title,
+// 		date: contents.work_completed_date,
+// 		tag_id: contents_tags.tag_id,
+// 		content: contents.content,
+// 	})
+// 	.from(contents)
+// 	.innerJoin(contents_tags, eq(contents.content_id, contents_tags.content_id))
+// 	.orderBy(desc(contents.work_completed_date));
+// const tagsRequest = db.select().from(tags);
+
+// const [contentIds, contentList, tagsList] = await db.batch([
+// 	contentIdRequest,
+// 	contentListRequest,
+// 	tagsRequest,
+// ]);
+
+const {contentIds, contentList, tagsList} = Astro.props;
+
+const listOfTagsInContent: {
+	[key: string]: { tag_id: string; tag_name: string }[];
+} = {};
+
+for (const content of contentList) {
+	if (!listOfTagsInContent[content.content_id]) {
+		listOfTagsInContent[content.content_id] = [];
+	}
+	listOfTagsInContent[content.content_id].push({
+		tag_id: content.tag_id,
+		tag_name: tagsList.find((e) => e.tag_id === content.tag_id)!.tag_name,
+	});
+}
+---
+
+<Layout title="tags | Repository of Kehthe">
+	{
+		contentIds.map((data) => {
+			const content = contentList.find((e) => e.content_id === data.content_id)!;
+
+			return (
+				<ContentInfoCard
+					id={content.content_id}
+					title={content.title}
+					createdDate={content.date.toLocaleDateString("ja-JP", {
+						year: "numeric",
+						month: "2-digit",
+						day: "2-digit",
+					})}
+					content={content.content}
+					tags={listOfTagsInContent[content.content_id]}
+				/>
+			);
+		})
+	}
+</Layout>

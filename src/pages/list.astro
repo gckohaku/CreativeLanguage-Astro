@@ -1,13 +1,53 @@
 ---
-import ContentList from "../components/ContentList.astro";
+import { contents, contents_tags, db, desc, eq, tags } from "astro:db";
+import ContentInfoCard from "../components/ContentInfoCard.astro";
 import Layout from "../layouts/Layout.astro";
 
+const contentIdRequest = db
+	.selectDistinct({ id: contents_tags.content_id })
+	.from(contents_tags).innerJoin(contents, eq(contents.content_id, contents_tags.content_id)).orderBy(desc(contents.work_completed_date));
+const contentListRequest = db
+	.select({
+		content_id: contents.content_id,
+		title: contents.title,
+		date: contents.work_completed_date,
+		tag_id: contents_tags.tag_id,
+		content: contents.content
+	})
+	.from(contents)
+	.innerJoin(contents_tags, eq(contents.content_id, contents_tags.content_id))
+	.orderBy(desc(contents.work_completed_date));
+const tagsRequest = db.select().from(tags);
+
+const [contentIds, contentList, tagsList] = await db.batch([
+	contentIdRequest,
+	contentListRequest,
+	tagsRequest,
+]);
+
+const listOfTagsInContent: { [key: string]: {tag_id: string, tag_name: string}[] } = {};
+
+for (const content of contentList) {
+	if (!listOfTagsInContent[content.content_id]) {
+		listOfTagsInContent[content.content_id] = [];
+	}
+	listOfTagsInContent[content.content_id].push({tag_id: content.tag_id, tag_name: tagsList.find((e) => e.tag_id === content.tag_id)!.tag_name});
+}
 ---
 
-<Layout title="list">
+<Layout title="list | Repository of Kehthe">
 	<div class="content-list">
-		<!-- <ContentList contents={storeContents.contentsList}></ContentList> -->
-		現在調整中
+		{
+			contentIds.map((data) => {
+				const content = contentList.find((e) => e.content_id === data.id)!;
+
+				return (
+					<ContentInfoCard id={content.content_id} title={content.title} createdDate={content.date.toLocaleDateString("ja-JP", {year: "numeric", month: "2-digit", day: "2-digit"})} content={content.content} tags={listOfTagsInContent[content.content_id]} />
+				);
+			})
+		}
+
+		
 	</div>
 </Layout>
 

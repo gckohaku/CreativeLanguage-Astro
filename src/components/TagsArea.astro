@@ -1,0 +1,31 @@
+---
+import Tag from "./Tag.astro";
+
+interface Props {
+	tags: {
+		tag_id: string;
+		tag_name: string;
+	}[];
+}
+
+const {tags = [{tag_id: "error", tag_name: "error"}]} = Astro.props;
+---
+
+<div class="tags-area">
+	<!-- <Tag v-for="tag of tags" :tag="tag" /> -->
+	{
+		tags.map((tag) => (
+			!(tag.tag_id === "hidden") &&
+			(<Tag tag={tag} />)
+		))
+	}
+</div>
+
+<style lang="scss">
+	.tags-area {
+		padding: 0.5rem;
+		display: flex;
+		flex-direction: row;
+		gap: 1rem;
+	}
+</style>

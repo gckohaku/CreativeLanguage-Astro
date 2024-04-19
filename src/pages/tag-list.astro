@@ -1,0 +1,13 @@
+---
+import { asc, db, tags } from "astro:db";
+import TagsArea from "../components/TagsArea.astro";
+import Layout from "../layouts/Layout.astro";
+
+const tagsRequest = db.select().from(tags).orderBy(asc(tags.tag_name));
+
+const [tagsData] = await db.batch([tagsRequest]);
+---
+
+<Layout title="tags | Repository of Kehthe">
+	<TagsArea tags={tagsData} />
+</Layout>

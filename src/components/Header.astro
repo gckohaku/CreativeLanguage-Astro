@@ -2,16 +2,20 @@
 	<div class="header-container">
 		<h1 class="title-in-header">Repository of Kehthe</h1>
 		<nav>
-			<a href="/home">ホーム</a>
+			<a href="/">ホーム</a>
 			<a href="/tag-list">タグ一覧</a>
 		</nav>
 	</div>
 </div>
 
 <style lang="scss">
+	:root {
+		--header-height: 48px;
+	}
+
 	.header-wrapper {
 		width: 100%;
-		height: 48px;
+		height: var(--header-height);
 		background-color: #f0f8fc;
 		display: flex;
 		justify-content: center;

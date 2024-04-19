@@ -1,10 +1,6 @@
 ---
 import Header from "../components/Header.astro";
 
-interface Props {
-	title: string;
-}
-
 const { title } = Astro.props;
 ---
 
@@ -17,9 +13,12 @@ const { title } = Astro.props;
 		<!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+		/>
 	</head>
-	
+
 	<body>
 		<Header />
 		<div class="page-wrapper">
@@ -61,5 +60,12 @@ const { title } = Astro.props;
 	figure,
 	ul {
 		margin-block-end: 1rem;
+	}
+
+	input,
+	textarea {
+		padding: 0.25rem;
+		border-radius: 0.25rem;
+		border-width: 1px;
 	}
 </style>
