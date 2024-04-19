@@ -14,13 +14,13 @@ import Layout from "../layouts/Layout.astro";
 	<div class="index-container">
 		<ul>
 			<li>
-				<a href="/list">リスト</a>
+				<a href={import.meta.env.BASE_URL + "/list"}>リスト</a>
 			</li>
 			<li>
-				<a href="/tag-list">タグ一覧</a>
+				<a href={import.meta.env.BASE_URL + "/tag-list"}>タグ一覧</a>
 			</li>
 			<li>
-				<a href="/random">ランダム</a>
+				<a href={import.meta.env.BASE_URL + "/random"}>ランダム</a>
 			</li>
 		</ul>
 	</div>

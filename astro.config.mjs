@@ -8,4 +8,5 @@ export default defineConfig({
   output: "static",
   outDir: "docs",
   site: "https://gckohaku.github.io/CreativeLanguageArchive",
+  base: "/CreativeLanguageArchive",
 });
