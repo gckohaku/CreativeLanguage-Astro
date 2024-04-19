@@ -20,7 +20,7 @@ const {
 ---
 
 <div class="content-card">
-	<a class="title-link" href={"/content/" + id}>{title}</a>
+	<a class="title-link" href={import.meta.env.BASE_URL +  "/content/" + id}>{title}</a>
 	<p class="creating-date">
 		<span class="material-symbols-outlined">calendar_month</span>{
 			createdDate
