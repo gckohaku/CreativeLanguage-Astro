@@ -104,7 +104,7 @@ const generateCaption = (re: RegExpMatchArray | null): string => {
 							<img
 								class="content-image"
 								src={
-									"/images/content/" +
+									import.meta.env.BASE_URL + "/images/content/" +
 									imagesData.find(
 										(e) =>
 											e.index - 1 ===
