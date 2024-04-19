@@ -6,5 +6,6 @@ import db from "@astrojs/db";
 export default defineConfig({
   integrations: [db()],
   output: "static",
-  outDir: "docs"
+  outDir: "docs",
+  base: import.meta.env.DEV ? "/" :  "CreativeLanguage-Astro",
 });
