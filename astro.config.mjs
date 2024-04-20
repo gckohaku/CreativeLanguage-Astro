@@ -7,6 +7,6 @@ export default defineConfig({
   integrations: [db()],
   output: "static",
   outDir: "docs",
-  site: "https://gckohaku.github.io/CreativeLanguage-Astro",
-  base: "/CreativeLanguage-Astro",
+  site: "https://gckohaku.github.io/RepositoryOfKehthe",
+  base: "/RepositoryOfKehthe",
 });
